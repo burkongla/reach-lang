@@ -17,6 +17,7 @@ module Reach.Util
   , hdDie
   , justValues
   , Top(..)
+  , uncurry3
   )
 where
 
@@ -106,3 +107,6 @@ justValues = foldr' (\(k, mv) acc -> maybe acc ((: acc) . (k,)) mv) []
 data Top
   = CompileAll
   | CompileJust [String]
+
+uncurry3 :: (a -> b -> c -> d) -> (a, b, c) -> d
+uncurry3 f (a, b, c) = f a b c
