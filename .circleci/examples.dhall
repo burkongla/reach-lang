@@ -21,6 +21,7 @@
 , "overview-more-deps"
 , "overview-react"
 , "own-addr"
+, "pkg"
 , "popularity-contest"
 , "pr202105-zet"
 , "race"
