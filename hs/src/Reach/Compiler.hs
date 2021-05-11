@@ -4,6 +4,7 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.Map.Strict as M
 import qualified Data.Text as T
 import qualified Data.Text.Lazy.IO as LTIO
+import qualified Reach.Parser.Common as P
 import Reach.AddCounts
 import Reach.AST.DL
 import Reach.Backend.JS
@@ -15,7 +16,7 @@ import Reach.EraseLogic
 import Reach.Eval
 import Reach.Linearize
 import Reach.Optimize
-import Reach.Parser
+import Reach.Parser (JSBundle(..), gatherDeps_top)
 import Reach.Texty
 import Reach.Util
 import Reach.Verify
@@ -26,12 +27,15 @@ import Control.Monad (forM_)
 import Reach.Eval.Module (evalLibs, findTops)
 import Control.Monad.Reader (runReaderT)
 import Data.IORef (readIORef, writeIORef)
+import System.Directory
 
 data CompilerOpts = CompilerOpts
   { output :: T.Text -> String
   , source :: FilePath
   , tops :: Top
   , intermediateFiles :: Bool
+  , dirDotReach :: FilePath
+  , canGit :: Bool
   }
 
 all_connectors :: Connectors
@@ -67,7 +71,11 @@ compile copts = do
   let interOut outn_ = case outnMay outn_ of
         Just f -> LTIO.writeFile . f
         Nothing -> \_ _ -> return ()
-  djp <- gatherDeps_top $ source copts
+  dirDotReach' <- makeAbsolute $ dirDotReach copts
+  djp <- runReaderT (gatherDeps_top $ source copts) P.ParserOpts
+    { P.dirDotReach = dirDotReach'
+    , P.canGit = canGit copts
+    }
   interOut outn "bundle.js" $ render $ pretty djp
   -- Either compile all the Reach.Apps or those specified by user
   evalEnv <- defaultEnv all_connectors

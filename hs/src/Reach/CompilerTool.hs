@@ -8,6 +8,8 @@ import Reach.Util (Top(..))
 
 data CompilerToolOpts = CompilerToolOpts
   { cto_outputDir :: FilePath
+  , cto_dirDotReach :: FilePath
+  , cto_canGit :: Bool
   , cto_source :: FilePath
   , cto_tops :: [String]
   , cto_intermediateFiles :: Bool
@@ -26,6 +28,8 @@ makeCompilerOpts CompilerToolOpts {..} = do
       , source = srcp
       , tops = if null cto_tops then CompileAll else CompileJust cto_tops
       , intermediateFiles = cto_intermediateFiles
+      , dirDotReach = cto_dirDotReach
+      , canGit = cto_canGit
       }
 
 compilerToolMain :: CompilerToolOpts -> IO ()
