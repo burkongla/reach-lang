@@ -4,7 +4,6 @@ import qualified Data.HashMap.Strict as HM
 import qualified Data.Map.Strict as M
 import qualified Data.Text as T
 import qualified Data.Text.Lazy.IO as LTIO
-import qualified Reach.Parser.Common as P
 import Reach.AddCounts
 import Reach.AST.DL
 import Reach.Backend.JS
@@ -72,10 +71,7 @@ compile copts = do
         Just f -> LTIO.writeFile . f
         Nothing -> \_ _ -> return ()
   dirDotReach' <- makeAbsolute $ dirDotReach copts
-  djp <- runReaderT (gatherDeps_top $ source copts) P.ParserOpts
-    { P.dirDotReach = dirDotReach'
-    , P.canGit = canGit copts
-    }
+  djp <- gatherDeps_top (source copts) (canGit copts) dirDotReach'
   interOut outn "bundle.js" $ render $ pretty djp
   -- Either compile all the Reach.Apps or those specified by user
   evalEnv <- defaultEnv all_connectors
